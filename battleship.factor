@@ -2,14 +2,9 @@
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors arrays colors.constants kernel locals math
 math.rectangles math.vectors opengl sequences ui.gadgets
-ui.gadgets.labels ui.gadgets.tracks ui.render ;
+ui.gadgets.labels ui.gadgets.tracks ui.render battleship.arbiter battleship.types ;
 IN: battleship
 
-TUPLE: ship-part position hit? ;
-TUPLE: ship parts ;
-TUPLE: player id name ships ;
-TUPLE: battleship-game player1 player2 ;
-TUPLE: battleship-board < gadget ships ;
 
 CONSTANT: BOARD-SIZE { 10 10 }
 : line ( n len -- {p1,p2} )
@@ -35,11 +30,12 @@ CONSTANT: BOARD-SIZE { 10 10 }
 ! This feels like a hack. Should use something else than find ?
 : find-ship-part ( pos ships -- ship/f ship-part/f )
     [ f ] 2dip [ nip (find-ship-part) dup ] with find nip swap ;
-: hit ( ship -- str )
+: hit ( ship ship-part -- str )
+    t >>hit? drop
     parts>> [ hit?>> not ] filter length zero?
     "TOUCHÉ-COULÉ!!!" "TOUCHÉ!" ? ;
 : fire ( pos ships -- str )
-    find-ship-part t >>hit? drop [ hit ] [ "RATÉ" ] if* ;
+    find-ship-part [ hit ] [ drop "RATÉ" ] if* ;
 
 : ship-dead? ( ship -- ? ) parts>> [ hit?>> ] all? ;
 : player-dead? ( player -- ? ) ships>> [ ship-dead? ] all? ;
@@ -56,23 +52,12 @@ CONSTANT: BOARD-SIZE { 10 10 }
 : draw-ships ( game -- )
     dup ships>> [ draw-ship ] with each ;
 
-: <test-ships> ( -- ships )
-    { 1 1 } t ship-part boa
-    { 1 2 } f ship-part boa
-    { 1 3 } t ship-part boa 3array ship boa 1array ;
-: <test-board> ( -- board )
-    battleship-board new <test-ships> >>ships ;
-: <battleship-board> ( ships -- board ) battleship-board new swap >>ships ;
 M: battleship-board pref-dim* drop { 640 480 } ;
 M: battleship-board draw-gadget*
     [ draw-grid ] [ draw-ships ] bi ;
 : player-playing? ( player game -- ? )
     [ player1>> ] [ player2>> ] bi
-    [ = ] bi-curry@ bi or ;
-: <test-player> ( -- player )
-    player new
-    "Player-name" >>name
-    <test-ships> >>ships ;
+    [ name>> = ] bi-curry@ bi or ;
 : <upper-track> ( player1 player2 -- track )
     [ name>> <label> ] bi@ horizontal <track>
     swap 0.5 track-add swap 0.5 track-add ;
@@ -84,6 +69,10 @@ M: battleship-board draw-gadget*
 : <battleship-gadget> ( game -- gadget )
     [ player1>> ] [ player2>> ] bi [ <lower-track> ] [ <upper-track> ] 2bi
     vertical <track> swap 0.1 track-add swap 0.9 track-add ;
-: <test-game> ( -- game )
+: <battleship-game> ( players -- game )
+    first2 [ <player> ] bi@
     battleship-game new
-    <test-player> >>player1 <test-player> >>player2 ;
+    swap >>player1 swap >>player2 
+    dup player1>> >>current-player 
+    dup <arbiter> >>arbiter
+    ;

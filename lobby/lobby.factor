@@ -9,13 +9,15 @@ CONSTANT: players-per-game 2
 SYMBOL: waiting-list
 SYMBOL: games
 
+TUPLE: dummy-message data source ;
+
 : init-waitlist ( -- )
     players-per-game <vector> waiting-list set ;
 : init-games ( -- )
     10 <vector> games set ;
 
 : start-game ( players -- ) 
-    "," join "Starting game with " prepend print 
+    <battleship-game> games get push
     init-waitlist ;
 : ?start-game ( waiting-list -- )
     dup length players-per-game = [ start-game ] [ drop ] if ;
@@ -25,7 +27,7 @@ SYMBOL: games
     dup data>> protocol-new-game = [ source>> put-in-waitlist ] [ drop ] if ;
 : already-waiting ( rqst -- ) drop ;
 : waiting? ( id -- ? ) waiting-list get member? ;
-: handle-existing-player ( rqst game -- ) 2drop ;
+: handle-existing-player ( rqst game -- ) arbiter>> send ;
 : handle-new-player ( rqst -- )
     dup source>> waiting? [ already-waiting ] [ ?put-in-waitlist ] if ;
 : playing? ( id -- game/f )
