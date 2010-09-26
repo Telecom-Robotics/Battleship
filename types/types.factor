@@ -9,6 +9,10 @@ TUPLE: player name ships ;
 TUPLE: battleship-game player1 player2 arbiter current-player ;
 TUPLE: battleship-board < gadget ships ;
 
+: <ship-part> ( pos -- ship-part )
+    f ship-part boa ;
+: <ship> ( ship-parts -- ship )
+    ship boa ;
 : <test-ships> ( -- ships )
     { 1 1 } t ship-part boa
     { 1 2 } f ship-part boa

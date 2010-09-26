@@ -4,23 +4,32 @@ USING: accessors arrays battleship.types concurrency.messaging
 io kernel math.parser sequences threads ;
 IN: battleship.arbiter
 
-CONSTANT: ship-config { 5 4 3 2 }
+CONSTANT: ship-config { 5 }
+
+: log-pckt ( pckt -- ) [ source>> ] [ data>> ] bi "===> " glue print ;
 
 : dispatch ( data dst -- ) swap ":" glue print ;
 : other-player>> ( game -- player )
     dup [ current-player>> ] [ player1>> ] bi =
     [ player2>> ] [ player1>> ] if ;
 : swap-players ( game -- )
-    dup [ current-player>> ] [ player1>> ] bi = 
+    dup [ current-player>> ] [ player1>> ] bi =
     [ dup player2>> ] [ dup player1>> ] if
     >>current-player drop ;
 : ((player-receive)) ( player msg -- data/f )
     swap over [ name>> ] [ source>> ] bi* = [ data>> ] [ drop f ] if ;
-: (player-receive) ( player -- data/f ) receive ((player-receive)) ;
+: (player-receive) ( player -- data/f ) receive dup log-pckt ((player-receive)) ;
 : player-receive ( player -- data )
     [ (player-receive) dup ] curry [ drop ] until ;
-
-: parse-position ( data -- pos ) drop { 5 5 } ;
+: good-position? ( p -- ? )
+    dup length 2 = [ BOARD-SIZE [ { [ drop 0 >= ] [ < ] } 2&& ] 2all? ]
+    [ drop f ] if ;
+: sanitize-position ( p -- p/f )
+    dup good-position? [ drop f ] unless ;
+: parse-position ( data -- pos/f )
+    ";" split
+    dup { [ length 3 = ] [ first "FIRE" = ] } 1&&
+    [ rest [ string>number ] map sift sanitize-position ] [ drop f ] if ;
 : get-shoot-answer ( player -- pos )
     dup player-receive parse-position [ nip ] [ get-shoot-answer ] if* ;
 : prompt-shoot ( game -- )
@@ -36,20 +45,37 @@ CONSTANT: ship-config { 5 4 3 2 }
 
 : signal-end-game ( winner loser -- )
     "YOU WIN!" "YOU LOSE" [ swap name>> dispatch ] bi-curry@ bi* ;
-: unregister-game ( game -- ) drop ;
-: end-game ( game winner loser -- )
-    signal-end-game 
-    unregister-game ;
 DEFER: game-loop
 : ?continue-game ( game -- )
-    dup game-over? [ end-game ] [ drop game-loop ] if* ;
+    dup game-over? [ signal-end-game drop ] [ drop game-loop ] if* ;
 : game-loop ( game -- ) [ prompt-shoot ] [ swap-players ] [ ?continue-game ] tri ;
 
 : ship-request ( ship -- str )
-    number>string "SHIP" prepend ;
+    number>string "SHIP;" prepend ;
 : <test-ship> ( # -- ship )
     dup 2array f ship-part boa 1array ship boa ;
-: parse-ship ( # str -- ship ) drop <test-ship> ;
+:: ship-in-map? ( # x y orientation -- ? )
+   { [ x y 2array good-position? ]
+     [ orientation "H" = [ x # + y ] [ x y # + ] if
+     2array good-position? ]
+   } 0&& ;
+:: (ship-points) ( # x y orientation -- seq/f )
+    # x y orientation ship-in-map? [
+        # iota
+        orientation "H" = [
+            [ x + y 2array ] map ] [
+            [ x swap y + 2array ] map ]
+        if ] [ f ] if ;
+:: ship-points ( # x y orientation -- seq/f )
+    x y [ string>number ] bi@ :> ( X Y )
+    X Y and [ # X Y orientation (ship-points)
+    ] [ f ] if ;
+: build-ship ( # x y orientation -- ship/f )
+    ship-points [ [ <ship-part> ] map <ship> ] [ f ] if* ;
+: parse-ship ( # str -- ship/f )
+    ";" split
+    dup { [ length 4 = ] [ first "SHIP" = ] [ fourth { "H" "V" } member? ] } 1&&
+    [ rest first3 build-ship ] [ 2drop f ] if ;
 : add-ship ( player ship -- ) [ suffix ] curry change-ships drop ;
 : send-ship-request ( player ship -- )
     ship-request swap name>> dispatch ;
@@ -57,7 +83,7 @@ DEFER: game-loop
     over player-receive
     dupd parse-ship [ nip add-ship ] [ get-ship-answer ] if* ;
 : prompt-for-ship ( player ship -- )
-    [ send-ship-request ] 
+    [ send-ship-request ]
     [ get-ship-answer ] 2bi ;
 : (prompt-for-ships) ( player -- )
     ship-config [ prompt-for-ship ] with each ;
@@ -68,5 +94,5 @@ DEFER: game-loop
     [ prompt-for-ships ] [ game-loop ] bi ;
 : arbiter-name ( game -- name )
     players-list "Arbiter for " prepend ;
-: <arbiter> ( game -- arbiter )
-    [ [ do-game ] curry ] [ arbiter-name ] bi spawn ;
+: <arbiter> ( end-quot game -- arbiter )
+    [ [ do-game ] curry prepose ] [ arbiter-name ] bi spawn ;

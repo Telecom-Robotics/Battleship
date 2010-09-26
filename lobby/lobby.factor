@@ -16,8 +16,10 @@ TUPLE: dummy-message data source ;
 : init-games ( -- )
     10 <vector> games set ;
 
-: start-game ( players -- ) 
-    <battleship-game> games get push
+: unregister-game ( game -- ) games get remove! drop ;
+: register-game ( game -- ) games get push ;
+: start-game ( players -- )
+    <battleship-game> [ register-game ] [ [ [ unregister-game ] curry ] keep launch-arbiter ] bi
     init-waitlist ;
 : ?start-game ( waiting-list -- )
     dup length players-per-game = [ start-game ] [ drop ] if ;
@@ -36,8 +38,8 @@ TUPLE: dummy-message data source ;
     dup source>> >string playing? [ handle-existing-player ] [ handle-new-player ] if* ;
 : init-lobby ( -- )
     init-waitlist
-    init-games ; 
+    init-games ;
 : lobby ( -- t )
     receive handle t ;
-: start-lobby ( -- lobby-thread ) 
+: start-lobby ( -- lobby-thread )
     init-lobby [ lobby ] "BattleShip Lobby" spawn-server ;

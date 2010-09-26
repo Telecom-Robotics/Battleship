@@ -29,7 +29,7 @@ CONSTANT: BOARD-SIZE { 10 10 }
     parts>> [ [ position>> = ] [ hit?>> not ] bi and ] with find nip ;
 ! This feels like a hack. Should use something else than find ?
 : find-ship-part ( pos ships -- ship/f ship-part/f )
-    [ f ] 2dip [ nip (find-ship-part) dup ] with find nip swap ;
+    [ f ] 2dip [ (find-ship-part) nip dup ] with find nip swap ;
 : hit ( ship ship-part -- str )
     t >>hit? drop
     parts>> [ hit?>> not ] filter length zero?
@@ -69,10 +69,11 @@ M: battleship-board draw-gadget*
 : <battleship-gadget> ( game -- gadget )
     [ player1>> ] [ player2>> ] bi [ <lower-track> ] [ <upper-track> ] 2bi
     vertical <track> swap 0.1 track-add swap 0.9 track-add ;
+: launch-arbiter ( end-quot game -- )
+    [ <arbiter> ] keep arbiter<< ;
 : <battleship-game> ( players -- game )
     first2 [ <player> ] bi@
     battleship-game new
-    swap >>player1 swap >>player2 
-    dup player1>> >>current-player 
-    dup <arbiter> >>arbiter
+    swap >>player1 swap >>player2
+    dup player1>> >>current-player
     ;
