@@ -4,7 +4,7 @@ USING: accessors arrays battleship.types concurrency.messaging
 io kernel math.parser sequences threads ;
 IN: battleship.arbiter
 
-CONSTANT: ship-config { 5 }
+CONSTANT: ship-config { 5 4 }
 
 : log-pckt ( pckt -- ) [ source>> ] [ data>> ] bi "===> " glue print ;
 
@@ -79,9 +79,16 @@ DEFER: game-loop
 : add-ship ( player ship -- ) [ suffix ] curry change-ships drop ;
 : send-ship-request ( player ship -- )
     ship-request swap name>> dispatch ;
+: (ship-overlaps?) ( ship1 ship2 -- ? )
+    [ parts>> [ position>> ] map ] bi@ intersect empty? not ;
+: ship-overlaps? ( player ship -- ? )
+    [ ships>> ] dip [ (ship-overlaps?) ] curry any? ;
 : get-ship-answer ( player ship -- )
     over player-receive
-    dupd parse-ship [ nip add-ship ] [ get-ship-answer ] if* ;
+    dupd parse-ship [ 
+        3dup nip ship-overlaps? [ drop get-ship-answer ] [ nip add-ship ] if
+    ] [
+        get-ship-answer ] if* ;
 : prompt-for-ship ( player ship -- )
     [ send-ship-request ]
     [ get-ship-answer ] 2bi ;
