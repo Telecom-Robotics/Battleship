@@ -2,11 +2,11 @@
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors arrays colors.constants kernel locals math
 math.rectangles math.vectors opengl sequences ui.gadgets
-ui.gadgets.labels ui.gadgets.tracks ui.render battleship.arbiter battleship.types ;
-IN: battleship
+ui.gadgets.labels ui.gadgets.tracks ui.render
+Battleship.server.types ;
+IN: Battleship.server
 
 
-CONSTANT: BOARD-SIZE { 10 10 }
 : line ( n len -- {p1,p2} )
     0 swap [ 2array ] bi-curry@ bi 2array ;
 :: (calc-lines) ( dim n -- lines )
@@ -33,7 +33,7 @@ CONSTANT: BOARD-SIZE { 10 10 }
 : hit ( ship ship-part -- str )
     t >>hit? drop
     parts>> [ hit?>> not ] filter length zero?
-    "TOUCHÉ-COULÉ!!!" "TOUCHÉ!" ? ;
+    "TOUCHÉ-COULÉ!!!" "TOUCHÉ" ? ;
 : fire ( pos ships -- str )
     find-ship-part [ hit ] [ drop "RATÉ" ] if* ;
 
@@ -69,11 +69,10 @@ M: battleship-board draw-gadget*
 : <battleship-gadget> ( game -- gadget )
     [ player1>> ] [ player2>> ] bi [ <lower-track> ] [ <upper-track> ] 2bi
     vertical <track> swap 0.1 track-add swap 0.9 track-add ;
-: launch-arbiter ( end-quot game -- )
-    [ <arbiter> ] keep arbiter<< ;
 : <battleship-game> ( players -- game )
     first2 [ <player> ] bi@
     battleship-game new
     swap >>player1 swap >>player2
     dup player1>> >>current-player
     ;
+

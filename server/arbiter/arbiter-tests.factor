@@ -1,7 +1,7 @@
 ! Copyright (C) 2010 Jon Harper.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: tools.test battleship.arbiter ;
-IN: battleship.arbiter.tests
+USING: tools.test Battleship.server.arbiter ;
+IN: Battleship.server.arbiter.tests
 
 [ T{ ship
     { parts

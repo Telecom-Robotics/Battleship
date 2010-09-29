@@ -1,15 +1,14 @@
 ! Copyright (C) 2010 Jon Harper.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: accessors arrays battleship concurrency.messaging io
+USING: accessors arrays Battleship.server
+Battleship.server.types Battleship.server.arbiter concurrency.messaging io
 kernel namespaces sequences strings threads vectors ;
-IN: battleship.server
+IN: Battleship.server.lobby
 
 CONSTANT: protocol-new-game "NEWGAME"
 CONSTANT: players-per-game 2
 SYMBOL: waiting-list
 SYMBOL: games
-
-TUPLE: dummy-message data source ;
 
 : init-waitlist ( -- )
     players-per-game <vector> waiting-list set ;

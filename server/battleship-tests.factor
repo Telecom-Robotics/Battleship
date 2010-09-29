@@ -1,7 +1,7 @@
 ! Copyright (C) 2010 Jon Harper.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: accessors battleship kernel memoize tools.test ;
-IN: battleship.tests
+USING: accessors Battleship.server kernel memoize tools.test ;
+IN: Battleship.server.tests
 
 [ { { { 0 0 } { 0 1 } } { { 1 0 } { 1 1 } } } ] [ { 1 1 } 1 (calc-lines) ] unit-test
 [ { 

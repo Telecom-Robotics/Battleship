@@ -1,8 +1,10 @@
 ! Copyright (C) 2010 Jon Harper.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: accessors arrays battleship.types concurrency.messaging
-io kernel math.parser sequences threads ;
-IN: battleship.arbiter
+USING: Battleship.server Battleship.server.types accessors
+arrays combinators combinators.short-circuit
+concurrency.messaging io kernel locals math math.parser
+sequences sets splitting threads ;
+IN: Battleship.server.arbiter
 
 CONSTANT: ship-config { 5 4 }
 
@@ -103,3 +105,7 @@ DEFER: game-loop
     players-list "Arbiter for " prepend ;
 : <arbiter> ( end-quot game -- arbiter )
     [ [ do-game ] curry prepose ] [ arbiter-name ] bi spawn ;
+
+: launch-arbiter ( end-quot game -- )
+    [ <arbiter> ] keep arbiter<< ;
+

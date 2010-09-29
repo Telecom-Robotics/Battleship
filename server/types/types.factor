@@ -1,13 +1,17 @@
 ! Copyright (C) 2010 Jon Harper.
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors arrays kernel sequences ui.gadgets ;
-IN: battleship.types
+IN: Battleship.server.types
+
+CONSTANT: BOARD-SIZE { 10 10 }
 
 TUPLE: ship-part position hit? ;
 TUPLE: ship parts ;
 TUPLE: player name ships ;
 TUPLE: battleship-game player1 player2 arbiter current-player ;
 TUPLE: battleship-board < gadget ships ;
+
+TUPLE: dummy-message data source ;
 
 : <ship-part> ( pos -- ship-part )
     f ship-part boa ;
