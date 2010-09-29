@@ -78,17 +78,20 @@ M: battleship-board draw-gadget*
 
 ! TODO: move this to another file
 USING: accessors io io.encodings.ascii concurrency.messaging namespaces
-prettyprint io.streams.string assocs
+prettyprint io.streams.string assocs io.timeouts
 io.servers kernel threads fry ;
 FROM: io.sockets => remote-address ;
 
 SYMBOL: eth-clients
 
+: set-no-timeout ( -- )
+  input-stream get output-stream get [ f swap set-timeout ] bi@ ;
 : setup-client ( source -- )
     self swap eth-clients get-global set-at ;
 : handle-quot ( source lobby-thread -- quot )
     '[ readln _ dummy-message boa _ send t ] ; inline
 : handle-battleship-client ( lobby-thread -- a )
+    set-no-timeout
     remote-address get host>> dup setup-client
     [ swap handle-quot ] [ ] bi
     spawn-server [ receive print flush t ] loop ;

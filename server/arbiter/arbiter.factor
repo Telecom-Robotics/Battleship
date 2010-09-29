@@ -58,7 +58,7 @@ DEFER: game-loop
 : game-loop ( game -- ) [ prompt-shoot ] [ swap-players ] [ ?continue-game ] tri ;
 
 : ship-request ( ship -- str )
-    number>string protocol-ship protocol-separator glue ;
+    number>string protocol-ship swap protocol-separator glue ;
 : <test-ship> ( # -- ship )
     dup 2array f ship-part boa 1array ship boa ;
 :: ship-in-map? ( # x y orientation -- ? )
