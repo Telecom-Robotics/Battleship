@@ -82,7 +82,7 @@ ssize_t send_message(struct connection *connection_handle, char *msg, size_t len
   return send(connection_handle->fd, msg, len, 0);
 }
 
-ssize_t read_message(struct connection *connection_handle, char *msg, size_t len) {
+ssize_t recv_message(struct connection *connection_handle, char *msg, size_t len) {
   return recv(connection_handle->fd, msg, len, 0);
 }
 
