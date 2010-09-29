@@ -39,7 +39,7 @@ int main (int argc, char *argv[]) {
   int current_ship = 0;
   int current_line = 0;
   int current_column = 0;
-  int current_step = 2;
+  int current_step = 1;
   char *server_name;
   ssize_t r;
 
@@ -53,11 +53,16 @@ int main (int argc, char *argv[]) {
   server_name = argv[1];
   port = atoi(argv[2]);
 
+  fprintf(stderr, "Trying opening connection on %s:%d\n", server_name, port);
   my_connection = open_connection(port, server_name);
   if (my_connection == NULL) {
     fprintf(stderr, "Problem while opening connection on %s:%d\n", server_name, port);
     return EXIT_FAILURE;
   }
+  fprintf(stderr, "Connection SUCCESS\n");
+
+  sprintf(string_buf, "NEWGAME\r\n");
+  send_message(my_connection, string_buf, 9);
 
   while (1) {
     r = recv_message(my_connection, string_buf, MAX_STRING_LENGTH);
@@ -81,7 +86,7 @@ int main (int argc, char *argv[]) {
              );
 
       send_message(my_connection, string_buf, 12);
-      recv_message(my_connection, string_buf, MAX_STRING_LENGTH);
+      r = recv_message(my_connection, string_buf, MAX_STRING_LENGTH);
       if (r <= 0) {
         perror("Receiving message");
       }
@@ -107,10 +112,11 @@ int main (int argc, char *argv[]) {
               current_line
              );
       send_message(my_connection, string_buf, 12);
-      recv_message(my_connection, string_buf, MAX_STRING_LENGTH);
+      r = recv_message(my_connection, string_buf, MAX_STRING_LENGTH);
       if (r <= 0) {
         perror("Receiving message");
       }
+
       if (strncmp(string_buf, "OK", 2) == 0) {
         printf("DEBUG : FIRE at %d;%d SUCCESS\n", current_column, current_line);
         current_column += current_step;
@@ -122,16 +128,22 @@ int main (int argc, char *argv[]) {
       else if (strncmp(string_buf, "ERR", 3) == 0) {
         printf("DEBUG : FIRE at %d;%d FAILURE\n", current_column, current_line);
       }
-      else {
-        printf("WARNING : error in protocol\n");
-      }
     }
-    else if (strncmp(string_buf, "YOU WIN", 7) == 0) {
-      printf("YOU WIN!!\n");
-      return EXIT_SUCCESS;
+    else if (strncmp(string_buf, "RATE", 4) == 0) {
+      printf("Arf, c'est rate!!\n");
+    }
+    else if (strncmp(string_buf, "TOUCHE\n", 7) == 0) {
+      printf("Yes TOUCHE!!\n");
+    }
+    else if (strncmp(string_buf, "TOUCHE-", 7) == 0) {
+      printf("Et un bateau en moins!!\n");
     }
     else if (strncmp(string_buf, "YOU LOS", 7) == 0) {
       printf("YOU LOSE :(\n");
+      return EXIT_SUCCESS;
+    }
+    else if (strncmp(string_buf, "YOU WIN", 7) == 0) {
+      printf("YOU WIN :)\n");
       return EXIT_SUCCESS;
     }
     else {
