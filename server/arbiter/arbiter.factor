@@ -7,6 +7,12 @@ sequences sets splitting threads ;
 IN: Battleship.server.arbiter
 
 CONSTANT: ship-config { 5 4 }
+CONSTANT: protocol-fire "FIRE"
+CONSTANT: protocol-win "WIN"
+CONSTANT: protocol-lose "LOSE"
+CONSTANT: protocol-ship "SHIP"
+CONSTANT: protocol-horizontal "H"
+CONSTANT: protocol-separator ";"
 
 : log-pckt ( pckt -- ) [ source>> ] [ data>> ] bi "===> " glue print ;
 
@@ -28,13 +34,13 @@ CONSTANT: ship-config { 5 4 }
 : sanitize-position ( p -- p/f )
     dup good-position? [ drop f ] unless ;
 : parse-position ( data -- pos/f )
-    ";" split
-    dup { [ length 3 = ] [ first "FIRE" = ] } 1&&
+    protocol-separator split
+    dup { [ length 3 = ] [ first protocol-fire = ] } 1&&
     [ rest [ string>number ] map sift sanitize-position ] [ drop f ] if ;
 : get-shoot-answer ( player -- pos )
     dup player-receive parse-position [ nip ] [ get-shoot-answer ] if* ;
 : prompt-shoot ( game -- )
-    { [ current-player>> name>> "FIRE" swap dispatch ]
+    { [ current-player>> name>> protocol-fire swap dispatch ]
     [ current-player>> get-shoot-answer ]
     [ other-player>> ships>> fire ]
     [ current-player>> name>> dispatch ] } cleave ;
@@ -45,25 +51,25 @@ CONSTANT: ship-config { 5 4 }
     [ drop f f ] } cond ;
 
 : signal-end-game ( winner loser -- )
-    "YOU WIN!" "YOU LOSE" [ swap name>> dispatch ] bi-curry@ bi* ;
+    protocol-win protocol-lose [ swap name>> dispatch ] bi-curry@ bi* ;
 DEFER: game-loop
 : ?continue-game ( game -- )
     dup game-over? [ signal-end-game drop ] [ drop game-loop ] if* ;
 : game-loop ( game -- ) [ prompt-shoot ] [ swap-players ] [ ?continue-game ] tri ;
 
 : ship-request ( ship -- str )
-    number>string "SHIP;" prepend ;
+    number>string protocol-ship protocol-separator glue ;
 : <test-ship> ( # -- ship )
     dup 2array f ship-part boa 1array ship boa ;
 :: ship-in-map? ( # x y orientation -- ? )
    { [ x y 2array good-position? ]
-     [ orientation "H" = [ x # + y ] [ x y # + ] if
+     [ orientation protocol-horizontal = [ x # + y ] [ x y # + ] if
      2array good-position? ]
    } 0&& ;
 :: (ship-points) ( # x y orientation -- seq/f )
     # x y orientation ship-in-map? [
         # iota
-        orientation "H" = [
+        orientation protocol-horizontal = [
             [ x + y 2array ] map ] [
             [ x swap y + 2array ] map ]
         if ] [ f ] if ;
@@ -74,8 +80,8 @@ DEFER: game-loop
 : build-ship ( # x y orientation -- ship/f )
     ship-points [ [ <ship-part> ] map <ship> ] [ f ] if* ;
 : parse-ship ( # str -- ship/f )
-    ";" split
-    dup { [ length 4 = ] [ first "SHIP" = ] [ fourth { "H" "V" } member? ] } 1&&
+    protocol-separator split
+    dup { [ length 4 = ] [ first protocol-ship = ] [ fourth { "H" "V" } member? ] } 1&&
     [ rest first3 build-ship ] [ 2drop f ] if ;
 : add-ship ( player ship -- ) [ suffix ] curry change-ships drop ;
 : send-ship-request ( player ship -- )
