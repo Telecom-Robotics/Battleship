@@ -33,9 +33,9 @@ IN: Battleship.server
 : hit ( ship ship-part -- str )
     t >>hit? drop
     parts>> [ hit?>> not ] filter length zero?
-    "TOUCHÉ-COULÉ!!!" "TOUCHÉ" ? ;
+    "TOUCHE-COULE" "TOUCHE" ? ;
 : fire ( pos ships -- str )
-    find-ship-part [ hit ] [ drop "RATÉ" ] if* ;
+    find-ship-part [ hit ] [ drop "RATE" ] if* ;
 
 : ship-dead? ( ship -- ? ) parts>> [ hit?>> ] all? ;
 : player-dead? ( player -- ? ) ships>> [ ship-dead? ] all? ;
@@ -94,8 +94,7 @@ SYMBOL: log-stream
     [ swap handle-quot ] [ ] bi spawn-server drop
     remote-address get host>> [ setup-client [ receive print
     flush t ] loop ] curry "Sending thread toto" spawn drop
-    [ log-stream get [ "Coucou" self id>> . print ] with-output-stream*
-    5 seconds sleep t ] loop ;
+    [ 1 seconds sleep t ] loop ;
 
 
 
@@ -114,7 +113,7 @@ SYMBOL: log-stream
 : dispatch ( data dst -- ) 
     [ swap ":" glue print ]
     [ dup . eth-clients get-global at [ send ] [ drop ] if* ] 2bi 
-    1 seconds sleep ;
+    10 milliseconds sleep ;
 
     
 

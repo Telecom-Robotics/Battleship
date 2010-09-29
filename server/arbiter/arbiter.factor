@@ -3,13 +3,13 @@
 USING: Battleship.server Battleship.server.types accessors
 arrays combinators combinators.short-circuit
 concurrency.messaging io kernel locals math math.parser
-sequences sets splitting threads calendar ;
+sequences sets splitting threads calendar ui ui.gadgets ;
 IN: Battleship.server.arbiter
 
 CONSTANT: ship-config { 5 }
 CONSTANT: protocol-fire "FIRE"
-CONSTANT: protocol-win "WIN"
-CONSTANT: protocol-lose "LOSE"
+CONSTANT: protocol-win "YOU WIN"
+CONSTANT: protocol-lose "YOU LOSE"
 CONSTANT: protocol-ship "SHIP"
 CONSTANT: protocol-horizontal "H"
 CONSTANT: protocol-separator ";"
@@ -45,7 +45,7 @@ CONSTANT: protocol-separator ";"
 : prompt-shoot ( game -- )
     { [ current-player>> name>> protocol-fire swap dispatch ]
     [ current-player>> get-shoot-answer ]
-    [ other-player>> ships>> fire 1 seconds sleep ]
+    [ other-player>> ships>> fire ]
     [ current-player>> name>> dispatch ] } cleave ;
 : game-over? ( game -- winner/f loser/f )
     {
@@ -108,8 +108,12 @@ DEFER: game-loop
 ! TODO prompt for ships in 2 threads, one for each player
 : prompt-for-ships ( game -- )
     [ player1>> ] [ player2>> ] bi 2array [ (prompt-for-ships) ] each ;
+: display-game ( game -- )
+    <battleship-gadget> dup "Battleship"
+    open-window [ relayout-1 200 milliseconds sleep t ] curry
+    "toto" spawn-server drop ;
 : do-game ( game -- )
-    [ prompt-for-ships ] [ game-loop ] bi ;
+    [ prompt-for-ships ] [ display-game ] [ game-loop ] tri ;
 : arbiter-name ( game -- name )
     players-list "Arbiter for " prepend ;
 : <arbiter> ( end-quot game -- arbiter )
