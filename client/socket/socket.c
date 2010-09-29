@@ -13,6 +13,8 @@
 
 #include "../connection.h"
 
+#define DEBUG 0
+
 struct connection {
   int fd;
 };
