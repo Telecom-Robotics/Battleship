@@ -76,3 +76,37 @@ M: battleship-board draw-gadget*
     dup player1>> >>current-player
     ;
 
+! TODO: move this to another file
+USING: accessors io io.encodings.ascii concurrency.messaging namespaces
+prettyprint io.streams.string assocs
+io.servers kernel threads fry ;
+FROM: io.sockets => remote-address ;
+
+SYMBOL: eth-clients
+
+: setup-client ( source -- )
+    self swap eth-clients get-global set-at ;
+: handle-quot ( source lobby-thread -- quot )
+    '[ readln _ dummy-message boa _ send t ] ; inline
+: handle-battleship-client ( lobby-thread -- a )
+    remote-address get host>> dup setup-client
+    [ swap handle-quot ] [ ] bi
+    spawn-server [ receive print flush t ] loop ;
+
+: <Battleship-server> ( lobby-thread -- threaded-server )
+    ascii <threaded-server>
+        "Battleship-server" >>name
+        12345 >>insecure
+        swap [ handle-battleship-client ] curry >>handler ;
+
+: start-eth-listen ( lobby-thread -- eth-server )
+    H{ } clone eth-clients set-global
+    <Battleship-server> start-server ;
+
+: dispatch ( data dst -- ) 
+    [ swap ":" glue print ]
+    [ dup . eth-clients get-global at [ send ] [ drop ] if* ] 2bi ;
+
+    
+
+

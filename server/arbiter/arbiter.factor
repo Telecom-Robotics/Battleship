@@ -10,7 +10,6 @@ CONSTANT: ship-config { 5 4 }
 
 : log-pckt ( pckt -- ) [ source>> ] [ data>> ] bi "===> " glue print ;
 
-: dispatch ( data dst -- ) swap ":" glue print ;
 : other-player>> ( game -- player )
     dup [ current-player>> ] [ player1>> ] bi =
     [ player2>> ] [ player1>> ] if ;
