@@ -3,10 +3,10 @@
 USING: Battleship.server Battleship.server.types accessors
 arrays combinators combinators.short-circuit
 concurrency.messaging io kernel locals math math.parser
-sequences sets splitting threads ;
+sequences sets splitting threads calendar ;
 IN: Battleship.server.arbiter
 
-CONSTANT: ship-config { 5 4 }
+CONSTANT: ship-config { 5 }
 CONSTANT: protocol-fire "FIRE"
 CONSTANT: protocol-win "WIN"
 CONSTANT: protocol-lose "LOSE"
@@ -16,6 +16,8 @@ CONSTANT: protocol-separator ";"
 
 : log-pckt ( pckt -- ) [ source>> ] [ data>> ] bi "===> " glue print ;
 
+: ack ( player -- ) [ "OK" ] dip name>> dispatch ;
+: no-ack ( player -- ) [ "ERR" ] dip name>> dispatch ;
 : other-player>> ( game -- player )
     dup [ current-player>> ] [ player1>> ] bi =
     [ player2>> ] [ player1>> ] if ;
@@ -38,11 +40,12 @@ CONSTANT: protocol-separator ";"
     dup { [ length 3 = ] [ first protocol-fire = ] } 1&&
     [ rest [ string>number ] map sift sanitize-position ] [ drop f ] if ;
 : get-shoot-answer ( player -- pos )
-    dup player-receive parse-position [ nip ] [ get-shoot-answer ] if* ;
+    dup player-receive parse-position [ [ ack ] dip ] [ [ no-ack ] [
+    get-shoot-answer ] bi ] if* ;
 : prompt-shoot ( game -- )
     { [ current-player>> name>> protocol-fire swap dispatch ]
     [ current-player>> get-shoot-answer ]
-    [ other-player>> ships>> fire ]
+    [ other-player>> ships>> fire 1 seconds sleep ]
     [ current-player>> name>> dispatch ] } cleave ;
 : game-over? ( game -- winner/f loser/f )
     {
@@ -93,9 +96,10 @@ DEFER: game-loop
 : get-ship-answer ( player ship -- )
     over player-receive
     dupd parse-ship [ 
-        3dup nip ship-overlaps? [ drop get-ship-answer ] [ nip add-ship ] if
+        3dup nip ship-overlaps? [ drop [ drop no-ack ] [
+        get-ship-answer ] 2bi ] [ nip [ drop ack ] [ add-ship ] 2bi ] if
     ] [
-        get-ship-answer ] if* ;
+        [ drop no-ack ] [ get-ship-answer ] 2bi ] if* ;
 : prompt-for-ship ( player ship -- )
     [ send-ship-request ]
     [ get-ship-answer ] 2bi ;

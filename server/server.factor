@@ -78,37 +78,43 @@ M: battleship-board draw-gadget*
 
 ! TODO: move this to another file
 USING: accessors io io.encodings.ascii concurrency.messaging namespaces
-prettyprint io.streams.string assocs io.timeouts
-io.servers kernel threads fry ;
+prettyprint io.streams.string assocs
+io.servers kernel threads fry calendar ;
 FROM: io.sockets => remote-address ;
 
 SYMBOL: eth-clients
+SYMBOL: log-stream
 
-: set-no-timeout ( -- )
-  input-stream get output-stream get [ f swap set-timeout ] bi@ ;
 : setup-client ( source -- )
     self swap eth-clients get-global set-at ;
 : handle-quot ( source lobby-thread -- quot )
-    '[ readln _ dummy-message boa _ send t ] ; inline
-: handle-battleship-client ( lobby-thread -- a )
-    set-no-timeout
-    remote-address get host>> dup setup-client
-    [ swap handle-quot ] [ ] bi
-    spawn-server [ receive print flush t ] loop ;
+    '[ readln [ "\n\r" member? not ] filter _ dummy-message boa _ send t ] ; inline
+: handle-battleship-client ( lobby-thread -- )
+    remote-address get host>> 
+    [ swap handle-quot ] [ ] bi spawn-server drop
+    remote-address get host>> [ setup-client [ receive print
+    flush t ] loop ] curry "Sending thread toto" spawn drop
+    [ log-stream get [ "Coucou" self id>> . print ] with-output-stream*
+    5 seconds sleep t ] loop ;
 
-: <Battleship-server> ( lobby-thread -- threaded-server )
+
+
+: <Battleship-server> ( lobby-thread port -- threaded-server )
     ascii <threaded-server>
         "Battleship-server" >>name
-        12345 >>insecure
+        swap >>insecure
+        f >>timeout
         swap [ handle-battleship-client ] curry >>handler ;
 
-: start-eth-listen ( lobby-thread -- eth-server )
+: start-eth-listen ( lobby-thread port -- eth-server )
+    output-stream get log-stream set
     H{ } clone eth-clients set-global
     <Battleship-server> start-server ;
 
 : dispatch ( data dst -- ) 
     [ swap ":" glue print ]
-    [ dup . eth-clients get-global at [ send ] [ drop ] if* ] 2bi ;
+    [ dup . eth-clients get-global at [ send ] [ drop ] if* ] 2bi 
+    1 seconds sleep ;
 
     
 
