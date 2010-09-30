@@ -106,12 +106,12 @@ int main (int argc, char *argv[]) {
 
   while (1) {
 
-    if (strncmp(string_buf, "FIRE", 4) == 0) {
+    if (strncmp(string_buf, "FIRE", 4) == 0 || strncmp(string_buf, "ERR", 3) == 0) {
       sprintf(string_buf, "FIRE;%1d;%1d\r\n",
               current_column,
               current_line
              );
-      send_message(my_connection, string_buf, 12);
+      send_message(my_connection, string_buf, 9);
       r = recv_message(my_connection, string_buf, MAX_STRING_LENGTH);
       if (r <= 0) {
         perror("Receiving message");
@@ -127,6 +127,11 @@ int main (int argc, char *argv[]) {
       }
       else if (strncmp(string_buf, "ERR", 3) == 0) {
         printf("DEBUG : FIRE at %d;%d FAILURE\n", current_column, current_line);
+        sprintf(string_buf, "FIRE;%1d;%1d\r\n",
+                current_column,
+                current_line
+               );
+        send_message(my_connection, string_buf, 9);
       }
     }
     else if (strncmp(string_buf, "RATE", 4) == 0) {
