@@ -3,8 +3,9 @@
 USING: accessors arrays colors.constants kernel locals math
 math.rectangles math.vectors opengl sequences ui.gadgets
 ui.gadgets.labels ui.gadgets.tracks ui.render
-Battleship.server.types ;
+Battleship.server.types sets ;
 IN: Battleship.server
+FROM: namespaces => set ;
 
 
 : line ( n len -- {p1,p2} )
@@ -34,8 +35,10 @@ IN: Battleship.server
     t >>hit? drop
     parts>> [ hit?>> not ] filter length zero?
     "TOUCHE-COULE" "TOUCHE" ? ;
-: fire ( pos ships -- str )
-    find-ship-part [ hit ] [ drop "RATE" ] if* ;
+: plouf ( pos player -- )
+    missed>> adjoin ;
+: fire ( pos player -- str )
+    2dup ships>> find-ship-part [ hit 2nip ] [ drop plouf "RATE" ] if* ;
 
 : ship-dead? ( ship -- ? ) parts>> [ hit?>> ] all? ;
 : player-dead? ( player -- ? ) ships>> [ ship-dead? ] all? ;
@@ -44,17 +47,20 @@ IN: Battleship.server
     rect-bounds nip BOARD-SIZE v/ ;
 : ship-color ( ship-part -- )
     hit?>> COLOR: red COLOR: blue ? gl-color ;
-: draw-position ( gadget ship-part -- )
-    position>> swap width/height
+: draw-position ( gadget pos -- )
+    swap width/height
     [ v* ] [ nip ] 2bi gl-fill-rect ;
 : draw-ship ( gadget ship -- )
-    parts>> [ [ ship-color ] [ draw-position ] bi ] with each ;
+    parts>> [ [ ship-color ] [ position>> draw-position ] bi ] with each ;
 : draw-ships ( game -- )
-    dup ships>> [ draw-ship ] with each ;
+    dup player>> ships>> [ draw-ship ] with each ;
+: draw-missed ( gadget -- )
+    dup player>> missed>> [ [ COLOR: green gl-color draw-position ] with each
+    ] [ drop ] if* ;
 
 M: battleship-board pref-dim* drop { 640 480 } ;
 M: battleship-board draw-gadget*
-    [ draw-grid ] [ draw-ships ] bi ;
+    [ draw-grid ] [ draw-missed ] [ draw-ships ] tri ;
 : player-playing? ( player game -- ? )
     [ player1>> ] [ player2>> ] bi
     [ name>> = ] bi-curry@ bi or ;
@@ -62,7 +68,7 @@ M: battleship-board draw-gadget*
     [ name>> <label> ] bi@ horizontal <track>
     swap 0.5 track-add swap 0.5 track-add ;
 : <lower-track> ( player1 player2 -- track )
-    [ ships>> <battleship-board> ] bi@
+    [ <battleship-board> ] bi@
     horizontal <track>
     swap 0.5 track-add swap 0.5 track-add
     { 10 10 } >>gap ;
@@ -79,24 +85,37 @@ M: battleship-board draw-gadget*
 ! TODO: move this to another file
 USING: accessors io io.encodings.ascii concurrency.messaging namespaces
 prettyprint io.streams.string assocs
-io.servers kernel threads fry calendar ;
-FROM: io.sockets => remote-address ;
+io.servers kernel threads fry calendar calendar.format system
+math.parser ;
+FROM: io.sockets => remote-address local-address ;
 
 SYMBOL: eth-clients
 SYMBOL: log-stream
 
+: log ( msg -- )
+    log-stream get [ print ] with-output-stream* ;
 : setup-client ( source -- )
     self swap eth-clients get-global set-at ;
-: handle-quot ( source lobby-thread -- quot )
-    '[ readln [ "\n\r" member? not ] filter _ dummy-message boa _ send t ] ; inline
-: handle-battleship-client ( lobby-thread -- )
+: unregister-client ( source -- ) drop ;
+:: handle ( source lobby-thread -- ? )
+    readln dup empty? [ drop f ]
+    [ [ "\n\r" member? not ] filter source [ dummy-message
+    boa lobby-thread send t ] [ swap "===>" glue log ] 2bi ] if ;
+: client-id ( -- id )
     remote-address get host>> 
-    [ swap handle-quot ] [ ] bi spawn-server drop
-    remote-address get host>> [ setup-client [ receive print
-    flush t ] loop ] curry "Sending thread toto" spawn drop
-    [ 1 seconds sleep t ] loop ;
-
-
+    local-address get port>> number>string
+    "|" glue nano-count number>string 
+    ";" glue ;
+: spawn-listen-thread ( lobby-thread client-id -- )
+    [ swap [ handle ] 2curry ] [ ] bi spawn-server drop ;
+: spawn-send-thread ( client-id -- )
+    [ setup-client [ receive print flush t ] loop ] curry
+    "Sending thread toto" spawn drop ;
+: handle-battleship-client ( lobby-thread -- )
+    client-id
+    [ spawn-listen-thread ] [ spawn-send-thread ] 
+    [ receive drop unregister-client ] tri ;
+    
 
 : <Battleship-server> ( lobby-thread port -- threaded-server )
     ascii <threaded-server>

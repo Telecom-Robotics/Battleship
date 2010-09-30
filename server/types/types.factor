@@ -7,9 +7,9 @@ CONSTANT: BOARD-SIZE { 10 10 }
 
 TUPLE: ship-part position hit? ;
 TUPLE: ship parts ;
-TUPLE: player name ships ;
+TUPLE: player name ships missed ;
 TUPLE: battleship-game player1 player2 arbiter current-player ;
-TUPLE: battleship-board < gadget ships ;
+TUPLE: battleship-board < gadget player ;
 
 TUPLE: dummy-message data source ;
 
@@ -23,7 +23,8 @@ TUPLE: dummy-message data source ;
     { 1 3 } t ship-part boa 3array ship boa 1array ;
 : <test-board> ( -- board )
     battleship-board new <test-ships> >>ships ;
-: <battleship-board> ( ships -- board ) battleship-board new swap >>ships ;
+: <battleship-board> ( ships -- board ) battleship-board new
+    swap >>player ;
 : <test-player> ( -- player )
     player new
     "Player-name" >>name
@@ -36,5 +37,5 @@ TUPLE: dummy-message data source ;
     battleship-game new
     <test-player> >>player1 <test-player> >>player2 ;
 : <player> ( name -- player )
-    player new swap >>name ;
+    player new swap >>name V{ } clone >>missed ;
 
