@@ -79,7 +79,7 @@ M: battleship-board draw-gadget*
 ! TODO: move this to another file
 USING: accessors io io.encodings.ascii concurrency.messaging namespaces
 prettyprint io.streams.string assocs
-io.servers kernel threads fry calendar ;
+io.servers kernel threads fry calendar calendar.format ;
 FROM: io.sockets => remote-address ;
 
 SYMBOL: eth-clients
@@ -87,16 +87,22 @@ SYMBOL: log-stream
 
 : setup-client ( source -- )
     self swap eth-clients get-global set-at ;
+: unregister-client ( source -- )
+    eth-clients get drop drop ;
 : handle-quot ( source lobby-thread -- quot )
     '[ readln [ "\n\r" member? not ] filter _ dummy-message boa _ send t ] ; inline
+: client-id ( -- id )
+    remote-address get host>> now timestamp>rfc822 append ;
+: spawn-listen-thread ( lobby-thread client-id -- )
+    [ swap handle-quot ] [ ] bi spawn-server drop ;
+: spawn-send-thread ( client-id -- )
+    [ setup-client [ receive print flush t ] loop ] curry
+    "Sending thread toto" spawn drop ;
 : handle-battleship-client ( lobby-thread -- )
-    remote-address get host>> 
-    [ swap handle-quot ] [ ] bi spawn-server drop
-    remote-address get host>> [ setup-client [ receive print
-    flush t ] loop ] curry "Sending thread toto" spawn drop
-    [ 1 seconds sleep t ] loop ;
-
-
+    client-id
+    [ spawn-listen-thread ] [ spawn-send-thread ] 
+    [ receive drop unregister-client ] tri ;
+    
 
 : <Battleship-server> ( lobby-thread port -- threaded-server )
     ascii <threaded-server>
