@@ -6,7 +6,7 @@ concurrency.messaging io kernel locals math math.parser
 sequences sets splitting threads calendar ui ui.gadgets ;
 IN: Battleship.server.arbiter
 
-CONSTANT: ship-config { 5 }
+CONSTANT: ship-config { 5 4 3 3 2 }
 CONSTANT: protocol-fire "FIRE"
 CONSTANT: protocol-win "YOU WIN"
 CONSTANT: protocol-lose "YOU LOSE"
@@ -14,7 +14,7 @@ CONSTANT: protocol-ship "SHIP"
 CONSTANT: protocol-horizontal "H"
 CONSTANT: protocol-separator ";"
 
-: log-pckt ( pckt -- ) [ source>> ] [ data>> ] bi "===> " glue print ;
+! : log-pckt ( pckt -- ) [ source>> ] [ data>> ] bi "===> " glue print ;
 
 : ack ( player -- ) [ "OK" ] dip name>> dispatch ;
 : no-ack ( player -- ) [ "ERR" ] dip name>> dispatch ;
@@ -27,7 +27,7 @@ CONSTANT: protocol-separator ";"
     >>current-player drop ;
 : ((player-receive)) ( player msg -- data/f )
     swap over [ name>> ] [ source>> ] bi* = [ data>> ] [ drop f ] if ;
-: (player-receive) ( player -- data/f ) receive dup log-pckt ((player-receive)) ;
+: (player-receive) ( player -- data/f ) receive ((player-receive)) ;
 : player-receive ( player -- data )
     [ (player-receive) dup ] curry [ drop ] until ;
 : good-position? ( p -- ? )
@@ -45,7 +45,7 @@ CONSTANT: protocol-separator ";"
 : prompt-shoot ( game -- )
     { [ current-player>> name>> protocol-fire swap dispatch ]
     [ current-player>> get-shoot-answer ]
-    [ other-player>> ships>> fire ]
+    [ other-player>> fire ]
     [ current-player>> name>> dispatch ] } cleave ;
 : game-over? ( game -- winner/f loser/f )
     {
