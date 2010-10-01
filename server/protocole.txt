@@ -13,8 +13,8 @@ MODE PLACEMENT BATEAUX.
 Sinon, la chaine reçue est "SHIP;L".
 .Le client doit placer le bateau de longueur L (2<=L<=5) :
 Le client renvoit la chaine "SHIP;X;Y;ORIENTATION", où X et Y sont
-les coordonées du point le plus en haut à gauche du bateau
-et ORIENTATION vaut soit "H" soit "V" (pour horizontal ou vertical)
+les coordonnées du point le plus en haut à gauche du bateau (les plus petites coordonnées).
+et ORIENTATION vaut soit "H" soit "V" (respectivement horizontal ou vertical). Les coordonnées des lignes ou colonnes sont incrémentées jusqu'à placer le bateau.
 Toutes les parties du bateaux doivent être dans la zone de jeu : 0<=X<10 et 0<=Y<10 pour toute les parties du bateau. Par exemple, pour un bteau de taille 2, "SHIP;8;0;H" est valide mais pour un bateau de taille 3, ça ne l'est pas.
 .Si le client a envoyé un bateau valide, il recoit la chaine "OK". Sinon, il recoit "ERR" et doit renvoyer un bateau valide jusqu'à obtenir la chaine OK
 .Retour au début du mode PLACEMENT BATEAUX.
@@ -22,6 +22,6 @@ Toutes les parties du bateaux doivent être dans la zone de jeu : 0<=X<10 et 0<=
 MODE JEU
 .Le client envoit une chaine "FIRE;X;Y", où X et Y sont les coordonnées
 du tir.
-.Le client recoit une réponse "TOUCHÉ" "COULÉ" ou "TOUCHÉ-COULÉ"
+.Le client recoit une réponse "TOUCHE" ou "TOUCHE-COULE".
 .Le client attend une chaine. SI il recoit "FIRE" il retourne au début du mode JEU.
 Sinon, il reçoit ou bien "YOU WIN!" ou bien "YOU LOSE!" et la partie est finie.
