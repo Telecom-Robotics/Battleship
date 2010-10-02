@@ -1,6 +1,8 @@
 ! Copyright (C) 2010 Jon Harper.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: help.markup help.syntax kernel quotations ;
+USING: Battleship.client.factor.protocol arrays
+classes.singleton hashtables help.markup help.syntax kernel
+math quotations sequences ;
 IN: Battleship.client.factor.strategies
 
 HELP: attack-strategy
@@ -56,10 +58,9 @@ ARTICLE: "Battleship.client.factor.strategies" "Battleship strategies"
     fire
     place-ship
 }
-"Strategies are set with " { $link with-attack-strategy } " and " { $link with-random-strategy } "."
+"Strategies are set with " { $link with-attack-strategy } " and " { $link with-placement-strategy } "."
 $nl
-"New strategies should be added to the " { $vocab-link "Battleship.client.factor.strategies.all" } " vocabulary, "
-" so that they can then be used in the " { $link with-random-strategy } " word."
+"New strategies should be added to the " { $vocab-link "Battleship.client.factor.strategies.all" } " vocabulary."
 ;
 
 ABOUT: "Battleship.client.factor.strategies"
