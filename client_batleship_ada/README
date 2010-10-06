@@ -1,0 +1,6 @@
+Client Battelship Ada
+
+Pour pouvoir utiliser ce programme, télécharger la librairie Adasocket de Samuel Tardieu : 
+http://www.rfc1149.net/devel/adasockets
+
+Modifier le Makefile en fonction de l'emplacement de cette librairie !!!!
