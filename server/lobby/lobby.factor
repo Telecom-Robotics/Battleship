@@ -35,10 +35,20 @@ SYMBOL: games
     games get [ player-playing? ] with find nip ;
 : handle ( request -- )
     dup source>> >string playing? [ handle-existing-player ] [ handle-new-player ] if* ;
+SYMBOL: log-stream
+: init-log ( -- )
+    output-stream get log-stream set ;
 : init-lobby ( -- )
+    init-log
     init-waitlist
     init-games ;
+
+: log ( msg -- )
+    log-stream get [ print ] with-output-stream* ;
+: log-dummy-msg ( msg -- )
+    [ source>> ] [ data>> ] bi "==>" glue log ;
+
 : lobby ( -- t )
-    receive handle t ;
+    receive [ log-dummy-msg ] [ handle ] bi t ;
 : start-lobby ( -- lobby-thread )
     init-lobby [ lobby ] "BattleShip Lobby" spawn-server ;

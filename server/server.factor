@@ -90,17 +90,13 @@ math.parser ;
 FROM: io.sockets => remote-address local-address ;
 
 SYMBOL: eth-clients
-SYMBOL: log-stream
-
-: log ( msg -- )
-    log-stream get [ print ] with-output-stream* ;
 : setup-client ( source -- )
     self swap eth-clients get-global set-at ;
 : unregister-client ( source -- ) drop ;
 :: handle ( source lobby-thread -- ? )
     readln dup empty? [ drop f ]
-    [ [ "\n\r" member? not ] filter source [ dummy-message
-    boa lobby-thread send t ] [ swap "===>" glue log ] 2bi ] if ;
+    [ [ "\n\r" member? not ] filter source dummy-message
+    boa lobby-thread send t ] if ;
 : client-id ( -- id )
     remote-address get host>> 
     local-address get port>> number>string
@@ -125,7 +121,6 @@ SYMBOL: log-stream
         swap [ handle-battleship-client ] curry >>handler ;
 
 : start-eth-listen ( lobby-thread port -- eth-server )
-    output-stream get log-stream set
     H{ } clone eth-clients set-global
     <Battleship-server> start-server ;
 
@@ -134,6 +129,18 @@ SYMBOL: log-stream
     [ dup . eth-clients get-global at [ send ] [ drop ] if* ] 2bi 
     10 milliseconds sleep ;
 
-    
+QUALIFIED: xbee.dispatcher
+: register-xbee-client ( lobby-thread recipient -- )
+   xbee.dispatcher:register-recipient ;
 
-
+! Command to launch on the XBee host:
+!  socat TCP-LISTEN:4161,forever,fork,reuseaddr
+!  /dev/ttyUSB0,raw,b57600
+! Then, supposedly, "JH" register-xbee-client 
+USING: xbee xbee.api xbee.api.simple ;
+: start-xbee ( -- )
+    "jonction.enst.fr" 4161 <remote-xbee> xbee set
+    enter-api-mode
+    "CC" set-my
+    6 set-retries
+    xbee.dispatcher:start-dispatcher ;
