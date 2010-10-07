@@ -24,7 +24,7 @@ SIZE         = avr-size
 
 OBJECTS = battleship.o ../uart_atmega/uart_atmega.o
 HEADERS = $(shell echo *.h)
-CFLAGS = -g -Os -finline-limit=800 -mmcu=$(MCU) -DF_CPU=$(F_CPU) -Werror -Wall -I../uart_atmega
+CFLAGS = -Os -finline-limit=800 -mmcu=$(MCU) -DF_CPU=$(F_CPU) -Werror -Wall -I../uart_atmega
 #CFLAGS += -D_DEBUGUART_
 LDFLAGS = -L /usr/local/avr/avr/lib -mmcu=$(MCU)
 AVRDUDE_BAUDRATE = 9600
