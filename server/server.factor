@@ -123,13 +123,15 @@ SYMBOL: eth-clients
 : start-eth-listen ( lobby-thread port -- eth-server )
     H{ } clone eth-clients set-global
     <Battleship-server> start-server ;
-
+QUALIFIED: xbee.dispatcher
+: (dispatch) ( data dst -- )
+    dup length 2 = [ xbee.dispatcher:dispatch ] [ dup . eth-clients get-global at [ send ] [
+    drop ] if* ] if ;
 : dispatch ( data dst -- ) 
     [ swap ":" glue print ]
-    [ dup . eth-clients get-global at [ send ] [ drop ] if* ] 2bi 
+    [ (dispatch) ] 2bi 
     10 milliseconds sleep ;
 
-QUALIFIED: xbee.dispatcher
 : register-xbee-client ( lobby-thread recipient -- )
    xbee.dispatcher:register-recipient ;
 
@@ -141,6 +143,6 @@ USING: xbee xbee.api xbee.api.simple ;
 : start-xbee ( -- )
     "jonction.enst.fr" 4161 <remote-xbee> xbee set
     enter-api-mode
-    "CC" set-my
+    ! "CC" set-my
     6 set-retries
     xbee.dispatcher:start-dispatcher ;

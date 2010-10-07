@@ -2,7 +2,7 @@
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors arrays Battleship.server
 Battleship.server.types Battleship.server.arbiter concurrency.messaging io
-kernel namespaces sequences strings threads vectors ;
+kernel namespaces sequences strings threads vectors prettyprint ;
 IN: Battleship.server.lobby
 
 CONSTANT: protocol-new-game "NEWGAME"
@@ -49,6 +49,7 @@ SYMBOL: log-stream
     [ source>> ] [ data>> ] bi "==>" glue log ;
 
 : lobby ( -- t )
-    receive [ log-dummy-msg ] [ handle ] bi t ;
+    receive "Got message" print dup .
+    [ log-dummy-msg ] [ handle ] bi t ;
 : start-lobby ( -- lobby-thread )
     init-lobby [ lobby ] "BattleShip Lobby" spawn-server ;

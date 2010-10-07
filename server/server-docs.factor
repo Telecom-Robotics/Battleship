@@ -151,15 +151,6 @@ HELP: line
 }
 { $description "" } ;
 
-HELP: log
-{ $values
-    { "msg" null }    
-}
-{ $description "" } ;
-
-HELP: log-stream
-{ $var-description "" } ;
-
 HELP: player-dead?
 { $values
     { "player" null }
