@@ -1,6 +1,6 @@
-SRC = battleship.c socket/socket.c
+SRC = battleship.c ../socket/socket.c
 EXE = battleship
-CFLAGS = -Wall
+CFLAGS = -Wall -I../socket
 
 
 ALL : $(EXE)

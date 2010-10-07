@@ -11,7 +11,7 @@
 #include <arpa/inet.h>
 #include <string.h>
 
-#include "../connection.h"
+#include "connection.h"
 
 #define DEBUG 0
 
