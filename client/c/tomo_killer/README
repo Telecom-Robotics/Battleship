@@ -1,0 +1,3 @@
+This is the client for battleship.
+
+For now, just run make here to compile "battleship". Later we could add args to compile for different architectures and different communication means.
