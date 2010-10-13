@@ -8,21 +8,21 @@ threads ui.gadgets ui.gadgets.tracks ui.render ;
 FROM: namespaces => set ;
 IN: Battleship.server
 
+: hit? ( part -- ? ) hit?>> value>> ;
 : (find-ship-part) ( pos ship -- ship-part/f )
-    parts>> [ [ position>> = ] [ hit?>> not ] bi and ] with find nip ;
+    parts>> [ [ position>> = ] [ hit? not ] bi and ] with find nip ;
 ! This feels like a hack. Should use something else than find ?
 : find-ship-part ( pos ships -- ship/f ship-part/f )
     [ f ] 2dip [ (find-ship-part) nip dup ] with find nip swap ;
 : hit ( ship ship-part -- str )
-    t >>hit? drop
-    parts>> [ hit?>> not ] filter length zero?
+    hit?>> t swap set-model
+    parts>> [ hit? not ] filter length zero?
     "TOUCHE-COULE" "TOUCHE" ? ;
 : plouf ( pos player -- )
     missed>> adjoin ;
 : fire ( pos player -- str )
     2dup ships>> find-ship-part [ hit 2nip ] [ drop plouf "RATE" ] if* ;
-
-: ship-dead? ( ship -- ? ) parts>> [ hit?>> ] all? ;
+: ship-dead? ( ship -- ? ) parts>> [ hit? ] all? ;
 : player-dead? ( player -- ? ) ships>> [ ship-dead? ] all? ;
 
 : player-playing? ( player game -- ? )

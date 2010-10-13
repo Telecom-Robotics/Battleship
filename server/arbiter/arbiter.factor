@@ -110,9 +110,7 @@ DEFER: game-loop
 : prompt-for-ships ( game -- )
     [ player1>> ] [ player2>> ] bi 2array [ (prompt-for-ships) ] each ;
 : display-game ( game -- )
-    <battleship-gadget> dup "Battleship"
-    open-window [ relayout-1 200 milliseconds sleep t ] curry
-    "toto" spawn-server drop ;
+    <battleship-gadget> "Battleship" open-window ;
 : do-game ( game -- )
     [ prompt-for-ships ] [ display-game ] [ game-loop ] tri ;
 : arbiter-name ( game -- name )

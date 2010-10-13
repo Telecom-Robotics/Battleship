@@ -27,7 +27,7 @@ IN: Battleship.server.display
 : width/height ( gadget -- {width,height} )
     rect-bounds nip BOARD-SIZE v/ ;
 : ship-color ( ship-part -- )
-    hit?>> COLOR: red COLOR: blue ? gl-color ;
+    hit? COLOR: red COLOR: blue ? gl-color ;
 : draw-position ( gadget pos -- )
     swap width/height
     [ v* ] [ nip ] 2bi gl-fill-rect ;
@@ -42,6 +42,7 @@ IN: Battleship.server.display
 M: battleship-board pref-dim* drop { 640 480 } ;
 M: battleship-board draw-gadget*
     [ draw-grid ] [ draw-missed ] [ draw-ships ] tri ;
+M: battleship-board model-changed nip relayout-1 ;
 
 : <upper-track> ( player1 player2 -- track )
     [ name>> <label> ] bi@ horizontal <track>
