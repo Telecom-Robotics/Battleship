@@ -1,9 +1,10 @@
 ! Copyright (C) 2010 Jon Harper.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: Battleship.server Battleship.server.types accessors
-arrays combinators combinators.short-circuit
+USING: Battleship.server Battleship.server.display Battleship.server.types 
+accessors arrays combinators combinators.short-circuit
 concurrency.messaging io kernel locals math math.parser
 sequences sets splitting threads calendar ui ui.gadgets ;
+
 IN: Battleship.server.arbiter
 
 CONSTANT: ship-config { 5 4 3 3 2 }

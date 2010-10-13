@@ -21,8 +21,6 @@ TUPLE: dummy-message data source ;
     { 1 1 } t ship-part boa
     { 1 2 } f ship-part boa
     { 1 3 } t ship-part boa 3array ship boa 1array ;
-: <test-board> ( -- board )
-    battleship-board new <test-ships> >>ships ;
 : <battleship-board> ( ships -- board ) battleship-board new
     swap >>player ;
 : <test-player> ( -- player )
