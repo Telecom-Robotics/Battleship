@@ -30,6 +30,6 @@ MEMO: test-player ( -- test-player ) <test-player> ;
 [ f ] [ { 1 1 } test-player ships>> find-ship-part drop >boolean ] unit-test
 
 [ t ] [ start-test-server 
-        number-of-players [ start-test-player ] times
-        wait-for-notifications
-        stop-server t ] unit-test
+        [ number-of-players [ start-test-player ] times
+        wait-for-notifications t ]
+        [ drop f ] recover swap stop-server ] unit-test
