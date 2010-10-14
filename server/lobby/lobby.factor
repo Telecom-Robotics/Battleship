@@ -2,7 +2,7 @@
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors arrays Battleship.server
 Battleship.server.types Battleship.server.arbiter concurrency.messaging io
-kernel namespaces sequences strings threads vectors ;
+kernel namespaces sequences strings threads vectors assocs ;
 IN: Battleship.server.lobby
 
 CONSTANT: protocol-new-game "NEWGAME"
@@ -13,10 +13,16 @@ SYMBOL: games
 : init-waitlist ( -- )
     players-per-game <vector> waiting-list set ;
 : init-games ( -- )
-    10 <vector> games set ;
-
-: unregister-game ( game -- ) games get remove! drop ;
-: register-game ( game -- ) games get push ;
+    H{ } games set ;
+: players-names ( game -- p1 p2 )
+    [ player1>> ] [ player2>> ] bi [ name>> ] bi@ ;
+: unregister-player ( player -- ) games get delete-at ;
+: unregister-game ( game -- )
+    players-names [ unregister-player ] bi@ ;
+: register-player ( game player -- ) games get set-at ;
+: register-game ( game -- )
+    dup players-names
+    [ register-player ] bi-curry@ bi ;
 : start-game ( players -- )
     <battleship-game> [ register-game ] [ [ [ unregister-game ] curry ] keep launch-arbiter ] bi
     init-waitlist ;
@@ -32,7 +38,7 @@ SYMBOL: games
 : handle-new-player ( rqst -- )
     dup source>> waiting? [ already-waiting ] [ ?put-in-waitlist ] if ;
 : playing? ( id -- game/f )
-    games get [ player-playing? ] with find nip ;
+    games get at ;
 : handle ( request -- )
     dup source>> >string playing? [ handle-existing-player ] [ handle-new-player ] if* ;
 : init-lobby ( -- )
