@@ -12,6 +12,7 @@ TUPLE: battleship-game player1 player2 arbiter current-player ;
 TUPLE: battleship-board < gadget player ;
 
 TUPLE: dummy-message data source ;
+SINGLETON: forfeit
 
 : <ship-part> ( pos -- ship-part )
     f <model> ship-part boa ;
@@ -41,4 +42,14 @@ TUPLE: dummy-message data source ;
     <test-player> >>player1 <test-player> >>player2 ;
 : <player> ( name -- player )
     player new swap >>name V{ } clone <model> >>missed ;
+
+CONSTANT: ship-config { 5 4 3 3 2 }
+CONSTANT: protocol-new-game "NEWGAME"
+CONSTANT: protocol-fire "FIRE"
+CONSTANT: protocol-win "YOU WIN"
+CONSTANT: protocol-lose "YOU LOSE"
+CONSTANT: protocol-ship "SHIP"
+CONSTANT: protocol-horizontal "H"
+CONSTANT: protocol-separator ";"
+
 

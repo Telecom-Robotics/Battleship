@@ -43,17 +43,3 @@ QUALIFIED: xbee.dispatcher
     [ swap ":" glue print ]
     [ (dispatch) ] 2bi ;
 
-: register-xbee-client ( lobby-thread recipient -- )
-   xbee.dispatcher:register-recipient ;
-
-! Command to launch on the XBee host:
-!  socat TCP-LISTEN:4161,forever,fork,reuseaddr
-!  /dev/ttyUSB0,raw,b57600
-! Then, supposedly, "JH" register-xbee-client 
-USING: xbee xbee.api xbee.api.simple ;
-: start-xbee ( -- )
-    "jonction.enst.fr" 4161 <remote-xbee> xbee set
-    enter-api-mode
-    ! "CC" set-my
-    6 set-retries
-    xbee.dispatcher:start-dispatcher ;

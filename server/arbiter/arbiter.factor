@@ -2,18 +2,10 @@
 ! See http://factorcode.org/license.txt for BSD license.
 USING: Battleship.server Battleship.server.display Battleship.server.types 
 accessors arrays combinators combinators.short-circuit
-concurrency.messaging io kernel locals math math.parser
+concurrency.messaging io kernel locals math math.parser continuations
 sequences sets splitting threads calendar ui ui.gadgets ;
 
 IN: Battleship.server.arbiter
-
-CONSTANT: ship-config { 5 4 3 3 2 }
-CONSTANT: protocol-fire "FIRE"
-CONSTANT: protocol-win "YOU WIN"
-CONSTANT: protocol-lose "YOU LOSE"
-CONSTANT: protocol-ship "SHIP"
-CONSTANT: protocol-horizontal "H"
-CONSTANT: protocol-separator ";"
 
 ! : log-pckt ( pckt -- ) [ source>> ] [ data>> ] bi "===> " glue print ;
 
@@ -30,7 +22,8 @@ CONSTANT: protocol-separator ";"
     swap over [ name>> ] [ source>> ] bi* = [ data>> ] [ drop f ] if ;
 : (player-receive) ( player -- data/f ) receive ((player-receive)) ;
 : player-receive ( player -- data )
-    [ (player-receive) dup ] curry [ drop ] until ;
+    [ (player-receive) dup ] curry [ drop ] until
+    dup protocol-new-game = [ drop forfeit throw ] when ;
 : good-position? ( p -- ? )
     dup length 2 = [ BOARD-SIZE [ { [ drop 0 >= ] [ < ] } 2&& ] 2all? ]
     [ drop f ] if ;
@@ -111,8 +104,17 @@ DEFER: game-loop
     [ player1>> ] [ player2>> ] bi 2array [ (prompt-for-ships) ] each ;
 : display-game ( game -- )
     <battleship-gadget> "Battleship" open-window ;
-: do-game ( game -- )
+: (do-game) ( game -- )
     [ prompt-for-ships ] [ display-game ] [ game-loop ] tri ;
+: handle-forfeit ( game -- )
+    [ other-player>> ] [ current-player>> ] bi signal-end-game ;
+: handle-exception ( game ex -- )
+    { 
+        { forfeit [ handle-forfeit ] }
+        [ 2drop ] 
+    } case ;
+: do-game ( game -- )
+    [ (do-game) ] [ handle-exception ] recover ;
 : arbiter-name ( game -- name )
     players-list "Arbiter for " prepend ;
 : <arbiter> ( end-quot game -- arbiter )
