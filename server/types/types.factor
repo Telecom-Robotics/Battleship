@@ -1,6 +1,6 @@
 ! Copyright (C) 2010 Jon Harper.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: accessors arrays kernel sequences ui.gadgets ;
+USING: accessors arrays kernel sequences ui.gadgets models ;
 IN: Battleship.server.types
 
 CONSTANT: BOARD-SIZE { 10 10 }
@@ -14,17 +14,20 @@ TUPLE: battleship-board < gadget player ;
 TUPLE: dummy-message data source ;
 
 : <ship-part> ( pos -- ship-part )
-    f ship-part boa ;
+    f <model> ship-part boa ;
 : <ship> ( ship-parts -- ship )
     ship boa ;
 : <test-ships> ( -- ships )
-    { 1 1 } t ship-part boa
-    { 1 2 } f ship-part boa
-    { 1 3 } t ship-part boa 3array ship boa 1array ;
-: <test-board> ( -- board )
-    battleship-board new <test-ships> >>ships ;
-: <battleship-board> ( ships -- board ) battleship-board new
-    swap >>player ;
+    { 1 1 } t <model> ship-part boa
+    { 1 2 } f <model> ship-part boa
+    { 1 3 } t <model> ship-part boa 3array ship boa 1array ;
+: register-ships ( board -- )
+    dup player>> ships>> [ parts>> [ hit?>> add-connection ] with each ] with each ; 
+: register-ploufs ( board -- )
+    dup player>> missed>> add-connection ;
+: register-elements ( board -- ) [ register-ships ] [ register-ploufs ] bi ;
+: <battleship-board> ( player -- board ) battleship-board new
+    swap >>player dup register-elements ;
 : <test-player> ( -- player )
     player new
     "Player-name" >>name
@@ -37,5 +40,5 @@ TUPLE: dummy-message data source ;
     battleship-game new
     <test-player> >>player1 <test-player> >>player2 ;
 : <player> ( name -- player )
-    player new swap >>name V{ } clone >>missed ;
+    player new swap >>name V{ } clone <model> >>missed ;
 

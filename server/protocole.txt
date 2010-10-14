@@ -22,6 +22,6 @@ Toutes les parties du bateaux doivent être dans la zone de jeu : 0<=X<10 et 0<=
 MODE JEU
 .Le client envoit une chaine "FIRE;X;Y", où X et Y sont les coordonnées
 du tir.
-.Le client recoit une réponse "TOUCHE" ou "TOUCHE-COULE".
-.Le client attend une chaine. SI il recoit "FIRE" il retourne au début du mode JEU.
+.Le client reçoit une réponse "RATE", "TOUCHE" ou "TOUCHE-COULE".
+.Le client attend une chaîne. SI il recoit "FIRE" il retourne au début du mode JEU.
 Sinon, il reçoit ou bien "YOU WIN!" ou bien "YOU LOSE!" et la partie est finie.
