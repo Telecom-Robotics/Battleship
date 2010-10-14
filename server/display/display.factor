@@ -1,9 +1,9 @@
 ! Copyright (C) 2010 Jon Harper.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: Battleship.server.types accessors arrays
-colors.constants kernel locals math math.rectangles
-math.vectors opengl sequences ui.gadgets ui.gadgets.labels
-ui.gadgets.tracks ui.render ;
+USING: Battleship.server Battleship.server.types accessors
+arrays colors.constants kernel locals math math.rectangles
+math.vectors models opengl sequences ui.gadgets
+ui.gadgets.labels ui.gadgets.tracks ui.render ;
 IN: Battleship.server.display
 
 : line ( n len -- {p1,p2} )
