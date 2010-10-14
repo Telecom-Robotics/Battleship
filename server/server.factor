@@ -3,8 +3,8 @@
 USING: Battleship.server.socket Battleship.server.types
 accessors arrays assocs calendar colors.constants
 concurrency.messaging io kernel locals math math.rectangles
-math.vectors namespaces opengl prettyprint sequences sets
-threads ui.gadgets ui.gadgets.tracks ui.render ;
+math.vectors models namespaces opengl prettyprint sequences
+sets threads ui.gadgets ui.gadgets.tracks ui.render ;
 FROM: namespaces => set ;
 IN: Battleship.server
 
@@ -19,7 +19,7 @@ IN: Battleship.server
     parts>> [ hit? not ] filter length zero?
     "TOUCHE-COULE" "TOUCHE" ? ;
 : plouf ( pos player -- )
-    missed>> adjoin ;
+    missed>> [ value>> adjoin ] [ notify-connections ] bi ;
 : fire ( pos player -- str )
     2dup ships>> find-ship-part [ hit 2nip ] [ drop plouf "RATE" ] if* ;
 : ship-dead? ( ship -- ? ) parts>> [ hit? ] all? ;

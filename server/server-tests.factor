@@ -7,19 +7,19 @@ Battleship.client.factor.strategies.attack.tomo
 Battleship.client.factor.strategies.placement.tomo
 Battleship.server Battleship.server.lobby
 Battleship.server.socket Battleship.server.types accessors
-calendar concurrency.messaging io.servers kernel math memoize
-namespaces threads tools.test ;
+calendar concurrency.messaging continuations io.servers kernel
+math memoize namespaces threads tools.test ;
 IN: Battleship.server.tests
 
 CONSTANT: test-port 24847
-CONSTANT: number-of-players 10
+CONSTANT: number-of-players 4
 MEMO: test-player ( -- test-player ) <test-player> ;
 : start-test-server ( -- server )
     [ start-lobby test-port start-eth-listen ] with-scope ;
 : notify ( thread-id -- )
     f swap send ;
 : wait-for-notifications ( -- )
-    number-of-players [ 10 seconds receive-timeout drop ] times ;
+    number-of-players [ 20 seconds receive-timeout drop ] times ;
 : start-test-player ( -- )
     [ "localhost" test-port [ tomo-attack [ tomo-placement [ play-battleship ] with-placement-strategy ] with-attack-strategy ] with-ascii-client ]
     self [ notify ] curry compose

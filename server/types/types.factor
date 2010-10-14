@@ -23,8 +23,11 @@ TUPLE: dummy-message data source ;
     { 1 3 } t <model> ship-part boa 3array ship boa 1array ;
 : register-ships ( board -- )
     dup player>> ships>> [ parts>> [ hit?>> add-connection ] with each ] with each ; 
+: register-ploufs ( board -- )
+    dup player>> missed>> add-connection ;
+: register-elements ( board -- ) [ register-ships ] [ register-ploufs ] bi ;
 : <battleship-board> ( player -- board ) battleship-board new
-    swap >>player dup register-ships ;
+    swap >>player dup register-elements ;
 : <test-player> ( -- player )
     player new
     "Player-name" >>name
@@ -37,5 +40,5 @@ TUPLE: dummy-message data source ;
     battleship-game new
     <test-player> >>player1 <test-player> >>player2 ;
 : <player> ( name -- player )
-    player new swap >>name V{ } clone >>missed ;
+    player new swap >>name V{ } clone <model> >>missed ;
 

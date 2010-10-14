@@ -36,7 +36,7 @@ IN: Battleship.server.display
 : draw-ships ( game -- )
     dup player>> ships>> [ draw-ship ] with each ;
 : draw-missed ( gadget -- )
-    dup player>> missed>> [ [ COLOR: green gl-color draw-position ] with each
+    dup player>> missed>> value>> [ [ COLOR: green gl-color draw-position ] with each
     ] [ drop ] if* ;
 
 M: battleship-board pref-dim* drop { 640 480 } ;
