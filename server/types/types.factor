@@ -52,4 +52,14 @@ CONSTANT: protocol-ship "SHIP"
 CONSTANT: protocol-horizontal "H"
 CONSTANT: protocol-separator ";"
 
+SYMBOL: log-stream
+: init-log ( -- )
+    output-stream get log-stream set ;
+: log ( msg -- )
+    log-stream get [ print ] with-output-stream* ;
+: plog ( obj -- )
+    log-stream get [ . ] with-output-stream* ;
+: log-dummy-msg ( msg -- )
+    [ source>> ] [ data>> ] bi "==>" glue log ;
+
 

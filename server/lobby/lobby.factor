@@ -40,9 +40,6 @@ SYMBOL: games
     games get at ;
 : handle ( request -- )
     dup source>> >string playing? [ handle-existing-player ] [ handle-new-player ] if* ;
-SYMBOL: log-stream
-: init-log ( -- )
-    output-stream get log-stream set ;
 : init-lobby ( -- )
     init-log
     init-waitlist

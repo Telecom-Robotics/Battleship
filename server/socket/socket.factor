@@ -8,10 +8,7 @@ FROM: io.sockets => remote-address local-address ;
 IN: Battleship.server.socket
 
 SYMBOL: eth-clients
-SYMBOL: log-stream
 
-: log ( msg -- )
-    log-stream get [ print ] with-output-stream* ;
 : setup-client ( source -- )
     self swap eth-clients get-global set-at ;
 : unregister-client ( source -- ) drop ;
@@ -43,7 +40,6 @@ SYMBOL: log-stream
         swap [ handle-battleship-client ] curry >>handler ;
 
 : start-eth-listen ( lobby-thread port -- eth-server )
-    output-stream get log-stream set
     H{ } clone eth-clients set-global
     <Battleship-server> start-server ;
 
