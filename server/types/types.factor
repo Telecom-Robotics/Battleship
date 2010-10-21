@@ -1,6 +1,7 @@
 ! Copyright (C) 2010 Jon Harper.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: accessors arrays kernel sequences ui.gadgets models ;
+USING: accessors arrays io kernel models namespaces prettyprint
+sequences ui.gadgets ;
 IN: Battleship.server.types
 
 CONSTANT: BOARD-SIZE { 10 10 }
