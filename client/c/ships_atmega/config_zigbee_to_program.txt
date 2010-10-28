@@ -1,6 +1,16 @@
+#### Config pour les Zigbee de la coupe
 +++
 atch14
 atid5353
 //atdlA2FF
 atdlFFFF
 atmyA2FF ( ou atmy0 pour flasher)
+
+
+#### Config pour le Zigbee de Jon (avec TG en initiales)
+atch12
+atid3332
+atdlCC
+atmy5447
+atcn
+
