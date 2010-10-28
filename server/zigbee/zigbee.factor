@@ -8,7 +8,7 @@ QUALIFIED: xbee.api.simple
 IN: Battleship.server.zigbee
 
 : send-message ( lobby-thread recipient message -- )
-   "Sending" plog dup plog swap dummy-message boa swap send ; 
+   "Sending" plog [ "\r" member? not ] filter dup plog swap dummy-message boa swap send ; 
 : ?send-message ( lobby-thread recipient message -- rest )
     dup plog "\n" split1 [ [ send-message ] dip ] [ 2nip ] if* >string ;
 : bufferize ( lobby-thread recipient -- )
@@ -26,5 +26,5 @@ IN: Battleship.server.zigbee
     "jonction.enst.fr" 4161 <remote-xbee> xbee set
     enter-api-mode
     "CC" xbee.api.simple:set-my
-    6 xbee.api.simple:set-retries
+    16 xbee.api.simple:set-retries
     xbee.dispatcher:start-dispatcher ;

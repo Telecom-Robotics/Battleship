@@ -55,11 +55,11 @@ CONSTANT: protocol-separator ";"
 
 SYMBOL: log-stream
 : init-log ( -- )
-    output-stream get log-stream set ;
+    output-stream get log-stream set-global ;
 : log ( msg -- )
-    log-stream get [ print ] with-output-stream* ;
+    log-stream get-global [ print ] with-output-stream* ;
 : plog ( obj -- )
-    log-stream get [ . ] with-output-stream* ;
+    log-stream get-global [ . ] with-output-stream* ;
 : log-dummy-msg ( msg -- )
     [ source>> ] [ data>> ] bi "==>" glue log ;
 

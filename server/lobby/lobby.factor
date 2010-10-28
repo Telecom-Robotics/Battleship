@@ -51,7 +51,6 @@ SYMBOL: games
     [ source>> ] [ data>> ] bi "==>" glue log ;
 
 : lobby ( -- t )
-    receive "Got message" print dup .
-    [ log-dummy-msg ] [ handle ] bi t ;
+    receive [ log-dummy-msg ] [ handle ] bi t ;
 : start-lobby ( -- lobby-thread )
     init-lobby [ lobby ] "BattleShip Lobby" spawn-server ;
