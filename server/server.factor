@@ -37,7 +37,7 @@ IN: Battleship.server
 
 QUALIFIED: xbee.dispatcher
 : (dispatch) ( data dst -- )
-    dup length 2 = [ "zigbee dispatch" log 2dup plog plog 500 milliseconds sleep  xbee.dispatcher:dispatch ] [ dup . eth-clients get-global at [ send ] [
+    dup length 2 = [ "zigbee dispatch" log 2dup plog plog [ "\n" append ] dip xbee.dispatcher:dispatch ] [ dup . eth-clients get-global at [ send ] [
     drop ] if* ] if ;
 : dispatch ( data dst -- ) 
     [ swap ":" glue print ]
