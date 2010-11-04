@@ -1,6 +1,7 @@
 ! Copyright (C) 2010 Jon Harper.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: accessors arrays kernel sequences ui.gadgets models ;
+USING: accessors arrays io kernel models namespaces prettyprint
+sequences ui.gadgets ;
 IN: Battleship.server.types
 
 CONSTANT: BOARD-SIZE { 10 10 }
@@ -12,6 +13,7 @@ TUPLE: battleship-game player1 player2 arbiter current-player ;
 TUPLE: battleship-board < gadget player ;
 
 TUPLE: dummy-message data source ;
+SINGLETON: forfeit
 
 : <ship-part> ( pos -- ship-part )
     f <model> ship-part boa ;
@@ -41,4 +43,24 @@ TUPLE: dummy-message data source ;
     <test-player> >>player1 <test-player> >>player2 ;
 : <player> ( name -- player )
     player new swap >>name V{ } clone <model> >>missed ;
+
+CONSTANT: ship-config { 5 4 3 3 2 }
+CONSTANT: protocol-new-game "NEWGAME"
+CONSTANT: protocol-fire "FIRE"
+CONSTANT: protocol-win "YOU WIN"
+CONSTANT: protocol-lose "YOU LOSE"
+CONSTANT: protocol-ship "SHIP"
+CONSTANT: protocol-horizontal "H"
+CONSTANT: protocol-separator ";"
+
+SYMBOL: log-stream
+: init-log ( -- )
+    output-stream get log-stream set-global ;
+: log ( msg -- )
+    log-stream get-global [ print ] with-output-stream* ;
+: plog ( obj -- )
+    log-stream get-global [ . ] with-output-stream* ;
+: log-dummy-msg ( msg -- )
+    [ source>> ] [ data>> ] bi "==>" glue log ;
+
 

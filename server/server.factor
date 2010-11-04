@@ -35,6 +35,11 @@ IN: Battleship.server
     dup player1>> >>current-player
     ;
 
+QUALIFIED: xbee.dispatcher
+: (dispatch) ( data dst -- )
+    dup length 2 = [ "zigbee dispatch" log 2dup plog plog [ "\n" append ] dip xbee.dispatcher:dispatch ] [ dup . eth-clients get-global at [ send ] [
+    drop ] if* ] if ;
 : dispatch ( data dst -- ) 
     [ swap ":" glue print ]
-    [ dup . eth-clients get-global at [ send ] [ drop ] if* ] 2bi ;
+    [ (dispatch) ] 2bi ;
+

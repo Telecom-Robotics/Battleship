@@ -2,10 +2,9 @@
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors arrays Battleship.server
 Battleship.server.types Battleship.server.arbiter concurrency.messaging io
-kernel namespaces sequences strings threads vectors assocs ;
+kernel namespaces sequences strings threads vectors assocs prettyprint ;
 IN: Battleship.server.lobby
 
-CONSTANT: protocol-new-game "NEWGAME"
 CONSTANT: players-per-game 2
 SYMBOL: waiting-list
 SYMBOL: games
@@ -42,9 +41,16 @@ SYMBOL: games
 : handle ( request -- )
     dup source>> >string playing? [ handle-existing-player ] [ handle-new-player ] if* ;
 : init-lobby ( -- )
+    init-log
     init-waitlist
     init-games ;
+
+: log ( msg -- )
+    log-stream get [ print ] with-output-stream* ;
+: log-dummy-msg ( msg -- )
+    [ source>> ] [ data>> ] bi "==>" glue log ;
+
 : lobby ( -- t )
-    receive handle t ;
+    receive [ log-dummy-msg ] [ handle ] bi t ;
 : start-lobby ( -- lobby-thread )
     init-lobby [ lobby ] "BattleShip Lobby" spawn-server ;
