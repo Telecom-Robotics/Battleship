@@ -47,7 +47,6 @@ SYMBOL: shots
 
 DEFER: handle-next-line
 : handle ( opts str -- )
-    200 milliseconds sleep
     {
         { $ protocol-fire [ drop synchronous-fire handle-next-line ] }
         { $ protocol-ship [ string>number synchronous-place-ship handle-next-line ] }
