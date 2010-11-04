@@ -32,6 +32,40 @@ struct ship get_new_ship(void) {
   return my_ship;
 }
 
+int recv_message_withn (struct connection *connection_handle, char *msg, size_t len)
+{
+  int r, i;
+  char *cur_msg;
+  int cur_len;
+  cur_msg = msg;
+  cur_len = 0;
+
+  while (1) {
+    r = recv_message(connection_handle, cur_msg, len - cur_len);
+
+    for (i=0; i<r; i++) {
+      if (cur_msg[i] == '\n')
+        break;
+    }
+
+    // we found a \n
+    if (i != r) {
+      break;
+    }
+
+    cur_len += r;
+    cur_msg += r;
+
+    // we have too many char
+    if (cur_len >= len) {
+      fprintf(stderr, "We received %d bytes without \\n but expected %ld chars\n", cur_len, len);
+      return -1;
+    }
+  }
+
+  return cur_len;
+}
+
 int main (int argc, char *argv[]) {
   struct connection *my_connection;
   char string_buf[MAX_STRING_LENGTH];
@@ -65,7 +99,7 @@ int main (int argc, char *argv[]) {
   send_message(my_connection, string_buf, 9);
 
   while (1) {
-    r = recv_message(my_connection, string_buf, MAX_STRING_LENGTH);
+    r = recv_message_withn(my_connection, string_buf, MAX_STRING_LENGTH);
     if (r <= 0) {
       perror("Receiving message");
     }
@@ -86,7 +120,7 @@ int main (int argc, char *argv[]) {
              );
 
       send_message(my_connection, string_buf, 12);
-      r = recv_message(my_connection, string_buf, MAX_STRING_LENGTH);
+      r = recv_message_withn(my_connection, string_buf, MAX_STRING_LENGTH);
       if (r <= 0) {
         perror("Receiving message");
       }
@@ -112,7 +146,7 @@ int main (int argc, char *argv[]) {
               current_line
              );
       send_message(my_connection, string_buf, 9);
-      r = recv_message(my_connection, string_buf, MAX_STRING_LENGTH);
+      r = recv_message_withn(my_connection, string_buf, MAX_STRING_LENGTH);
       if (r <= 0) {
         perror("Receiving message");
       }
@@ -156,7 +190,7 @@ int main (int argc, char *argv[]) {
     }
 
     // Read next messages
-    r = recv_message(my_connection, string_buf, MAX_STRING_LENGTH);
+    r = recv_message_withn(my_connection, string_buf, MAX_STRING_LENGTH);
     if (r <= 0) {
       perror("Receiving message");
     }
